@@ -13,21 +13,20 @@ import { ProductGridSkeleton } from "./product-grid";
 export function WishlistView() {
   const mounted = useMounted();
   const ids = useWishlist((s) => s.ids);
-  const [products, setProducts] = useState<ProductCardData[] | null>(null);
+  const [loaded, setLoaded] = useState<{ key: string; cards: ProductCardData[] } | null>(null);
   const key = ids.slice(0, 48).join(",");
 
   useEffect(() => {
-    if (!key) {
-      setProducts([]);
-      return;
-    }
+    if (!key) return;
     let cancelled = false;
-    getCardsByIds(key.split(",")).then((cards) => !cancelled && setProducts(cards));
+    getCardsByIds(key.split(",")).then((cards) => !cancelled && setLoaded({ key, cards }));
     return () => {
       cancelled = true;
     };
   }, [key]);
 
+  // Keep showing the previous list while a changed wishlist reloads.
+  const products = !key ? [] : (loaded?.cards ?? null);
   if (!mounted || products === null) return <ProductGridSkeleton count={4} />;
 
   const visible = products.filter((p) => ids.includes(p.id));

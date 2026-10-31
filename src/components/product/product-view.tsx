@@ -43,7 +43,7 @@ export function ProductView({ product }: { product: ProductDetail }) {
 
   const [color, setColor] = useState<string | null>(initialColor);
   const [size, setSize] = useState<string | null>(() => defaultSize(product.variants, initialColor));
-  const [quantity, setQuantity] = useState(1);
+  const [requestedQuantity, setQuantity] = useState(1);
   const [sizeError, setSizeError] = useState(false);
   const [adding, setAdding] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
@@ -75,10 +75,8 @@ export function ProductView({ product }: { product: ProductDetail }) {
   const guide = sizeGuideFor(product.category?.slug);
   const price = variant?.priceCents ?? product.priceCents;
 
-  // Keep the quantity within what can still be added.
-  useEffect(() => {
-    setQuantity((q) => Math.max(1, Math.min(q, Math.max(1, addable))));
-  }, [addable]);
+  // The quantity can never exceed what can still be added.
+  const quantity = Math.max(1, Math.min(requestedQuantity, Math.max(1, addable)));
 
   const selectColor = (name: string) => {
     setColor(name);
@@ -141,7 +139,8 @@ export function ProductView({ product }: { product: ProductDetail }) {
   return (
     <div className="grid gap-8 lg:grid-cols-12 lg:gap-12 xl:gap-16">
       <div className="lg:col-span-7">
-        <ProductGallery images={images} productName={product.name} />
+        {/* Keyed by colour so the gallery resets to the first image of the new colour. */}
+        <ProductGallery key={color ?? ""} images={images} productName={product.name} />
       </div>
 
       <div className="lg:col-span-5 xl:col-span-4 xl:col-start-9">

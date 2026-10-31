@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
@@ -13,14 +13,6 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
   const [zoomOpen, setZoomOpen] = useState(false);
   const [origin, setOrigin] = useState<{ x: number; y: number } | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
-  const key = images.map((i) => i.id).join();
-
-  // Reset when the selected colour changes the image set.
-  useEffect(() => {
-    setIndex(0);
-    scroller.current?.scrollTo({ left: 0 });
-  }, [key]);
-
   const current = images[index] ?? images[0];
   if (!current) return <div className="aspect-[4/5] bg-surface" />;
 

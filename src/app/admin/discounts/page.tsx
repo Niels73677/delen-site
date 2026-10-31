@@ -10,7 +10,7 @@ export default async function DiscountsPage() {
   return (
     <>
       <AdminHeader title="Discounts" description="Codes are validated and applied on the server at checkout." />
-      <DiscountManager discounts={data ?? []} />
+      <DiscountManager discounts={data ?? []} now={new Date().getTime()} />
     </>
   );
 }

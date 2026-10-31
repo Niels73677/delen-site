@@ -16,7 +16,7 @@ import type { FormState } from "@/lib/validation/schemas";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { EmptyRow, Panel, Table, Th } from "./ui";
 
-export function DiscountManager({ discounts }: { discounts: Tables<"discount_codes">[] }) {
+export function DiscountManager({ discounts, now }: { discounts: Tables<"discount_codes">[]; now: number }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [state, onSubmit, submitting] = useFormAction<FormState>(createDiscount, { status: "idle" });
@@ -32,7 +32,6 @@ export function DiscountManager({ discounts }: { discounts: Tables<"discount_cod
     }
   }, [state, router]);
 
-  const now = Date.now();
   return (
     <div className="grid gap-6 xl:grid-cols-3">
       <Panel title="Discount codes" className="xl:col-span-2">

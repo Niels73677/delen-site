@@ -16,33 +16,32 @@ const POPULAR = ["Heavyweight tee", "Wool coat", "Denim", "Hoodie", "Cap"];
 export function SearchOverlay({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Suggestion[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ query: string; products: Suggestion[]; total: number } | null>(null);
   const [active, setActive] = useState(-1);
   const debounced = useDebounce(query.trim(), 200);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
 
   useEffect(() => {
-    if (debounced.length < 2) {
-      setResults([]);
-      setTotal(0);
-      return;
-    }
+    if (debounced.length < 2) return;
     const controller = new AbortController();
-    setLoading(true);
     fetch(`/api/search?q=${encodeURIComponent(debounced)}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((data: { products: Suggestion[]; total: number }) => {
-        setResults(data.products ?? []);
-        setTotal(data.total ?? 0);
+        setResult({ query: debounced, products: data.products ?? [], total: data.total ?? 0 });
         setActive(-1);
       })
-      .catch(() => undefined)
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!controller.signal.aborted) setResult({ query: debounced, products: [], total: 0 });
+      });
     return () => controller.abort();
   }, [debounced]);
+
+  // Derived state: results only count when they belong to the current query.
+  const searching = debounced.length >= 2;
+  const loading = searching && result?.query !== debounced;
+  const results = searching && result ? result.products : [];
+  const total = searching && result ? result.total : 0;
 
   const go = (href: string) => {
     onOpenChange(false);

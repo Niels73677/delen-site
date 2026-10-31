@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useWishlist } from "@/stores/wishlist";
@@ -17,6 +18,7 @@ export function WishlistButton({
   className?: string;
   variant?: "icon" | "full";
 }) {
+  const router = useRouter();
   const mounted = useMounted();
   const saved = useWishlist((s) => s.ids.includes(productId));
   const toggle = useWishlist((s) => s.toggle);
@@ -27,7 +29,7 @@ export function WishlistButton({
     e.stopPropagation();
     const added = toggle(productId);
     toast(added ? `${productName} saved to your wishlist.` : `${productName} removed from your wishlist.`, {
-      action: added ? { label: "View", onClick: () => window.location.assign("/wishlist") } : undefined,
+      action: added ? { label: "View", onClick: () => router.push("/wishlist") } : undefined,
     });
   };
 
