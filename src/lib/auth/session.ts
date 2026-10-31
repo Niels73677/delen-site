@@ -27,6 +27,12 @@ export async function requireAdminPage() {
   return auth;
 }
 
+/** For admin pages: same redirects as requireAdminPage, plus a request-scoped client. */
+export async function adminPageContext() {
+  const auth = await requireAdminPage();
+  return { supabase: await createClient(), ...auth };
+}
+
 /** For server actions and route handlers. Throws AuthError. */
 export async function requireAdmin() {
   const supabase = await createClient();

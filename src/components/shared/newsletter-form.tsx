@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 import { subscribeToNewsletter } from "@/app/actions/newsletter";
+import { useFormAction } from "@/hooks/use-form-action";
 import { cn } from "@/lib/utils";
 import type { FormState } from "@/lib/validation/schemas";
 
@@ -17,7 +18,7 @@ export function NewsletterForm({
   tone?: "light" | "dark";
   className?: string;
 }) {
-  const [state, action, pending] = useActionState(subscribeToNewsletter, initial);
+  const [state, onSubmit, pending] = useFormAction(subscribeToNewsletter, initial);
   const formRef = useRef<HTMLFormElement>(null);
   const id = `newsletter-${source}`;
 
@@ -27,7 +28,7 @@ export function NewsletterForm({
 
   const dark = tone === "dark";
   return (
-    <form ref={formRef} action={action} noValidate className={cn("w-full", className)}>
+    <form ref={formRef} onSubmit={onSubmit} noValidate className={cn("w-full", className)}>
       <input type="hidden" name="source" value={source} />
       <div aria-hidden className="absolute -left-[9999px]">
         <label>

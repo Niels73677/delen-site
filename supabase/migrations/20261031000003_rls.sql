@@ -116,7 +116,8 @@ create policy "newsletter: admin read" on public.newsletter_subscribers
 -- Customers may only edit safe profile columns.
 revoke update on public.profiles from anon, authenticated;
 grant update (full_name, phone) on public.profiles to authenticated;
-grant update (role) on public.profiles to authenticated; -- guarded by protect_profile_role()
+-- Roles are changed only by the service role (see scripts/create-admin.mjs);
+-- protect_profile_role() is an additional guard.
 
 -- -----------------------------------------------------------------------------
 -- Storage: public product image bucket, admin-only writes.

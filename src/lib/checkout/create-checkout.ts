@@ -11,6 +11,8 @@ export type StripeSessionInput = {
   discountCents: number;
   discountCode: string | null;
   customerEmail: string | null;
+  /** Stripe Customer for signed-in users (prefills saved address). */
+  stripeCustomerId: string | null;
   expiresAt: Date;
   successUrl: string;
   cancelUrl: string;
@@ -33,6 +35,8 @@ export type CheckoutDeps = {
   createStripeSession: (input: StripeSessionInput) => Promise<{ id: string; url: string | null }>;
   attachSession: (orderId: string, sessionId: string) => Promise<void>;
   releaseOrder: (orderId: string) => Promise<void>;
+  /** Optional: returns a Stripe Customer id for a signed-in user. Failures are non-fatal. */
+  resolveCustomer?: (user: { id: string; email: string | null }) => Promise<string | null>;
   siteUrl: string;
   now?: () => Date;
 };
@@ -54,7 +58,7 @@ export async function createCheckout(deps: CheckoutDeps, request: CheckoutReques
     request.discountCode ? deps.loadDiscount(request.discountCode) : Promise.resolve(null),
   ]);
 
-  const quote = buildQuote(request.items, variants, discount, now);
+  const quote = buildQuote(request.items, variants, discount, now, Boolean(request.discountCode));
   if (!quote.ok) {
     throw new CheckoutError("STOCK", "Some items in your bag are no longer available.", quote.issues, 409);
   }
@@ -81,6 +85,8 @@ export async function createCheckout(deps: CheckoutDeps, request: CheckoutReques
     throw fromReservationError(error instanceof Error ? error.message : String(error));
   }
 
+  const stripeCustomerId = user && deps.resolveCustomer ? await deps.resolveCustomer(user).catch(() => null) : null;
+
   try {
     const session = await deps.createStripeSession({
       orderId: order.orderId,
@@ -90,6 +96,7 @@ export async function createCheckout(deps: CheckoutDeps, request: CheckoutReques
       discountCents: quote.totals.discountCents,
       discountCode: quote.discount?.code ?? null,
       customerEmail: user?.email ?? null,
+      stripeCustomerId,
       expiresAt,
       successUrl: `${deps.siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${deps.siteUrl}/checkout/cancelled?order=${order.orderId}`,

@@ -80,6 +80,45 @@ export function checkoutDeps(): CheckoutDeps {
       return { orderId: row.order_id, orderNumber: Number(row.order_number) };
     },
 
+    async resolveCustomer(user) {
+      const [{ data: profile }, { data: address }] = await Promise.all([
+        db.from("profiles").select("full_name, phone, stripe_customer_id").eq("id", user.id).maybeSingle(),
+        db.from("addresses").select("*").eq("user_id", user.id).eq("is_default", true).maybeSingle(),
+      ]);
+      if (!profile) return null;
+      const shipping = address
+        ? {
+            name: address.full_name,
+            phone: address.phone ?? profile.phone ?? undefined,
+            address: {
+              line1: address.line1,
+              line2: address.line2 ?? undefined,
+              city: address.city,
+              postal_code: address.postal_code,
+              state: address.region ?? undefined,
+              country: address.country,
+            },
+          }
+        : undefined;
+      const details = {
+        email: user.email ?? undefined,
+        name: profile.full_name ?? undefined,
+        phone: profile.phone ?? undefined,
+        shipping,
+        address: shipping?.address,
+      };
+      if (profile.stripe_customer_id) {
+        await stripe.customers.update(profile.stripe_customer_id, details);
+        return profile.stripe_customer_id;
+      }
+      const customer = await stripe.customers.create(
+        { ...details, metadata: { user_id: user.id } },
+        { idempotencyKey: `customer-${user.id}` },
+      );
+      await db.from("profiles").update({ stripe_customer_id: customer.id }).eq("id", user.id);
+      return customer.id;
+    },
+
     async createStripeSession(input) {
       return stripe.checkout.sessions.create(await sessionParams(stripe, input), {
         idempotencyKey: `checkout-session-${input.orderId}`,
@@ -120,8 +159,9 @@ async function sessionParams(stripe: Stripe, input: StripeSessionInput): Promise
   return {
     mode: "payment",
     client_reference_id: input.orderId,
-    customer_email: input.customerEmail ?? undefined,
-    customer_creation: "if_required",
+    ...(input.stripeCustomerId
+      ? { customer: input.stripeCustomerId, customer_update: { shipping: "auto", address: "auto", name: "auto" } }
+      : { customer_email: input.customerEmail ?? undefined, customer_creation: "if_required" }),
     billing_address_collection: "required",
     shipping_address_collection: {
       allowed_countries: [...commerce.shippingCountries],

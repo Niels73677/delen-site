@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   const purchasable = items
     .map((i) => ({ ...i, quantity: Math.min(i.quantity, lines.find((l) => l.variantId === i.variantId)?.stock ?? 0) }))
     .filter((i) => i.quantity > 0 && lines.find((l) => l.variantId === i.variantId)?.available);
-  const quote = buildQuote(purchasable, variants, discount);
+  const quote = buildQuote(purchasable, variants, discount, new Date(), Boolean(discountCode));
 
   return NextResponse.json({
     lines,

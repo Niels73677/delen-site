@@ -335,14 +335,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"email": string,"full_name": string | null,"id": string,"phone": string | null,"role": string,"updated_at": string
+                    "created_at": string,"email": string,"full_name": string | null,"id": string,"phone": string | null,"role": string,"stripe_customer_id": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"email": string,"full_name"?: string | null,"id": string,"phone"?: string | null,"role"?: string,"updated_at"?: string
+                    "created_at"?: string,"email": string,"full_name"?: string | null,"id": string,"phone"?: string | null,"role"?: string,"stripe_customer_id"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"email"?: string,"full_name"?: string | null,"id"?: string,"phone"?: string | null,"role"?: string,"updated_at"?: string
+                    "created_at"?: string,"email"?: string,"full_name"?: string | null,"id"?: string,"phone"?: string | null,"role"?: string,"stripe_customer_id"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     

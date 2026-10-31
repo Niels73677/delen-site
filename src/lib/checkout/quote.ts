@@ -73,6 +73,8 @@ export function buildQuote(
   variants: CheckoutVariant[],
   discount: DiscountRow | null,
   now: Date = new Date(),
+  /** True when the customer entered a code — a code that does not exist is then an error. */
+  codeRequested: boolean = discount !== null,
 ): Quote {
   const byId = new Map(variants.map((v) => [v.id, v]));
   const merged = new Map<string, number>();
@@ -116,7 +118,7 @@ export function buildQuote(
   const subtotalCents = plain.reduce((s, l) => s + l.unitPriceCents * l.quantity, 0);
   let discountError: string | null = null;
   let rule: DiscountRule | null = null;
-  if (discount) {
+  if (discount || codeRequested) {
     const result = validateDiscount(discount, subtotalCents, now);
     if (result.ok) rule = result.rule;
     else discountError = result.reason;

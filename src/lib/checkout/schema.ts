@@ -20,4 +20,7 @@ export const checkoutRequestSchema = z.object({
     .transform((v) => (v ? v.toUpperCase() : undefined)),
 });
 
-export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;
+export type CheckoutRequest = {
+  items: { variantId: string; quantity: number }[];
+  discountCode?: string;
+};
