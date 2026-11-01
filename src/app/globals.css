@@ -137,3 +137,292 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==========================================================================
+   Abstract layer: grain, outlined type, shapes, and the interaction runtime
+   (src/lib/fx/fx.ts). Everything degrades to a complete static page.
+   ========================================================================== */
+@layer components {
+  /* Outlined display type. Stroke follows --outline (defaults to the text colour token). */
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: max(1.2px, 0.012em) var(--outline, var(--foreground));
+  }
+  .outline-light {
+    --outline: var(--background);
+  }
+  .shape-arch {
+    border-radius: 999px 999px 0 0;
+  }
+  .shape-pill {
+    border-radius: 999px;
+  }
+  .shape-circle {
+    border-radius: 9999px;
+    aspect-ratio: 1;
+  }
+  .shape-leaf {
+    border-radius: 0 50% 0 50%;
+  }
+  .text-vertical {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+}
+
+/* Film grain over the whole store */
+.store-grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Reveal: only hidden once the runtime is ready, so no-JS and previews stay complete */
+.fx-ready [data-reveal]:not(.is-in) {
+  opacity: 0;
+  transform: translate3d(0, 34px, 0);
+}
+[data-reveal] {
+  transition:
+    opacity 1s var(--ease-editorial) var(--d, 0ms),
+    transform 1.1s var(--ease-editorial) var(--d, 0ms),
+    clip-path 1.3s var(--ease-editorial) var(--d, 0ms);
+}
+.fx-ready [data-reveal="mask"]:not(.is-in) {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(100% 0 0 0);
+}
+[data-reveal="mask"] {
+  clip-path: inset(0 0 0 0);
+}
+
+.fx-word {
+  transition: opacity 0.25s linear;
+}
+.fx-char {
+  display: inline-block;
+  will-change: transform;
+}
+[data-fx="tilt"] {
+  transition: transform 0.6s var(--ease-editorial);
+  transform-style: preserve-3d;
+}
+[data-fx="tilt"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.28), transparent 45%);
+}
+[data-fx="tilt"]:hover::after {
+  opacity: 1;
+}
+[data-fx="magnetic"] {
+  transition: transform 0.5s var(--ease-editorial);
+}
+[data-fx="marquee"] [data-track] {
+  will-change: transform;
+}
+
+/* Custom cursor (fine pointers only) */
+.fx-has-cursor,
+.fx-has-cursor a,
+.fx-has-cursor button,
+.fx-has-cursor [role="button"] {
+  cursor: none;
+}
+.fx-has-cursor input,
+.fx-has-cursor textarea,
+.fx-has-cursor select {
+  cursor: text;
+}
+.fx-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  mix-blend-mode: difference;
+}
+.fx-cursor.is-active {
+  opacity: 1;
+}
+.fx-cursor.is-hidden {
+  opacity: 0;
+}
+.fx-cursor::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #fafaf8;
+  transition:
+    transform 0.45s var(--ease-editorial),
+    background-color 0.3s;
+}
+.fx-cursor.is-hover::before {
+  transform: scale(4.2);
+  background: #fafaf8;
+}
+.fx-cursor.is-down::before {
+  transform: scale(0.6);
+}
+.fx-cursor span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%) scale(0.3);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 86px;
+  height: 86px;
+  border-radius: 999px;
+  background: #fafaf8;
+  color: #171717;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition:
+    transform 0.5s var(--ease-editorial),
+    opacity 0.3s;
+}
+.fx-cursor.is-label {
+  mix-blend-mode: normal;
+}
+.fx-cursor.is-label::before {
+  transform: scale(0);
+}
+.fx-cursor.is-label span {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Floating image for [data-fx="preview"] lists */
+.fx-preview {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 35;
+  pointer-events: none;
+  width: 260px;
+  aspect-ratio: 4 / 5;
+  margin: -170px 0 0 -130px;
+  opacity: 0;
+  overflow: hidden;
+  border-radius: 999px 999px 0 0;
+  transition: opacity 0.35s;
+}
+.fx-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.15);
+  transition: transform 0.8s var(--ease-editorial);
+}
+.fx-preview.is-visible {
+  opacity: 1;
+}
+.fx-preview.is-visible img {
+  transform: scale(1);
+}
+
+.fx-progress {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 60;
+  height: 2px;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: var(--accent);
+  pointer-events: none;
+}
+
+/* Hero entrance (pure CSS so it also plays in the static preview) */
+@keyframes rise {
+  from {
+    transform: translate3d(0, 110%, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes arch-open {
+  from {
+    clip-path: inset(100% 0 0 0 round 999px 999px 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 999px 999px 0 0);
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    border-radius: 58% 42% 55% 45% / 45% 55% 45% 55%;
+  }
+  50% {
+    border-radius: 42% 58% 38% 62% / 60% 40% 60% 40%;
+  }
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.anim-rise {
+  display: inline-block;
+  animation: rise 1.2s var(--ease-editorial) both;
+  animation-delay: var(--d, 0ms);
+}
+.anim-arch {
+  animation: arch-open 1.6s var(--ease-editorial) 0.15s both;
+}
+.anim-fade-up {
+  animation: fade-up 1s var(--ease-editorial) both;
+  animation-delay: var(--d, 0ms);
+}
+.anim-drift {
+  animation: drift 14s ease-in-out infinite;
+}
+.anim-spin {
+  animation: spin-slow 22s linear infinite;
+}
+.fx-ready .anim-spin[data-fx="spin"] {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-ready [data-reveal]:not(.is-in) {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}

@@ -82,13 +82,14 @@ describe.skipIf(!hasDatabase)("inventory & order functions (Postgres)", () => {
   it("marks an order paid exactly once (idempotent webhook)", async () => {
     const { rows } = await reserve(1);
     const orderId = rows[0].order_id;
-    await db.query("select attach_checkout_session($1, 'cs_test_db')", [orderId]);
+    const sessionId = `cs_test_db_${Date.now()}`;
+    await db.query("select attach_checkout_session($1, $2)", [orderId, sessionId]);
     const popularity = async () =>
       (await db.query("select p.popularity from products p join product_variants v on v.product_id = p.id where v.id = $1", [variantId])).rows[0]
         .popularity as number;
     const before = await popularity();
     for (let i = 0; i < 3; i++) {
-      await db.query("select mark_order_paid('cs_test_db', 'pi_1', $1, 'a@b.co', 'Ann', null, null, 0)", [price]);
+      await db.query("select mark_order_paid($2, 'pi_1', $1, 'test@example.com', 'Ann', null, null, 0)", [price, sessionId]);
     }
     const order = (await db.query("select status, payment_status, paid_at from orders where id = $1", [orderId])).rows[0];
     expect(order.status).toBe("paid");

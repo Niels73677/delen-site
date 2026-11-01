@@ -66,7 +66,8 @@ export function Footer() {
 
         <p
           aria-hidden
-          className="mt-24 select-none text-[clamp(4rem,19vw,19rem)] font-semibold leading-[0.8] tracking-[-0.06em] text-background/[0.06]"
+          data-fx="letters"
+          className="mt-24 select-none whitespace-nowrap text-[clamp(4rem,19vw,19rem)] font-semibold leading-[0.8] tracking-[-0.06em] text-background/[0.08]"
         >
           {brand.name}
         </p>

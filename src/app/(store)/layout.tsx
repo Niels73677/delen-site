@@ -2,10 +2,11 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { AccountSync } from "@/components/shared/account-sync";
+import { FxRuntime } from "@/components/shared/fx-runtime";
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <div className="store-grain">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:bg-foreground focus:px-4 focus:py-3 focus:text-background"
@@ -19,6 +20,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <Footer />
       <CartDrawer />
       <AccountSync />
-    </>
+      <FxRuntime />
+    </div>
   );
 }

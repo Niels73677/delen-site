@@ -1,27 +1,26 @@
-const ITEMS = [
-  "Complimentary shipping over €150",
-  "30-day returns",
-  "Organic & recycled fibres",
-  "Small-batch production",
-  "Designed to last",
-];
+const WORDS = ["Essentials", "Outerwear", "Knitwear", "Denim", "Tailoring", "Accessories"];
 
-export function Marquee() {
-  const row = [...ITEMS, ...ITEMS];
+/** Oversized words whose speed and direction follow the visitor's scrolling. */
+export function Marquee({ direction = 1 }: { direction?: 1 | -1 }) {
+  const row = [...WORDS, ...WORDS];
   return (
-    <div className="overflow-hidden border-b border-border py-4" aria-label="Store benefits">
+    <div data-fx="marquee" data-direction={direction} className="overflow-hidden border-y border-border py-6 lg:py-10" aria-label="Categories">
       <ul className="sr-only">
-        {ITEMS.map((t) => (
-          <li key={t}>{t}</li>
+        {WORDS.map((w) => (
+          <li key={w}>{w}</li>
         ))}
       </ul>
-      <div className="flex w-max animate-marquee motion-reduce:animate-none" aria-hidden>
+      <div data-track className="flex w-max animate-marquee items-center motion-reduce:animate-none [.fx-ready_&]:animate-none" aria-hidden>
         {[0, 1].map((k) => (
-          <div key={k} className="flex shrink-0">
-            {row.map((t, i) => (
-              <span key={`${k}-${i}`} className="eyebrow flex items-center whitespace-nowrap px-8 text-muted-foreground">
-                {t}
-                <span className="ml-16 inline-block size-1 rounded-full bg-accent" />
+          <div key={k} className="flex shrink-0 items-center">
+            {row.map((w, i) => (
+              <span key={`${k}-${i}`} className="flex items-center">
+                <span
+                  className={`whitespace-nowrap px-6 text-[clamp(3rem,9vw,8rem)] font-semibold uppercase leading-none tracking-[-0.05em] lg:px-10 ${i % 2 ? "text-outline" : ""}`}
+                >
+                  {w}
+                </span>
+                <span className="inline-block size-4 shrink-0 rounded-full bg-accent lg:size-6" />
               </span>
             ))}
           </div>

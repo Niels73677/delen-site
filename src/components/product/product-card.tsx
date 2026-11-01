@@ -75,9 +75,9 @@ export function ProductCard({
   };
 
   return (
-    <article className="group/card relative" data-testid="product-card">
-      <div className="relative aspect-[4/5] overflow-hidden bg-surface">
-        <Link href={`/products/${product.slug}`} aria-label={product.name} className="absolute inset-0 z-[1]" />
+    <article className="group/card relative" data-testid="product-card" data-reveal>
+      <div data-fx="tilt" className="relative aspect-[4/5] overflow-hidden bg-surface">
+        <Link href={`/products/${product.slug}`} aria-label={product.name} data-cursor="View" className="absolute inset-0 z-[1]" />
         {primary ? (
           <Image
             src={primary.url}

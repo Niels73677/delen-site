@@ -52,7 +52,7 @@ export function Header() {
         className={cn(
           "fixed inset-x-0 top-0 z-40 transition-[background-color,color,border-color,backdrop-filter] duration-500 ease-[var(--ease-editorial)]",
           overlay
-            ? "border-b border-transparent bg-transparent text-background"
+            ? "border-b border-transparent bg-transparent text-foreground"
             : "border-b border-border bg-background/90 text-foreground backdrop-blur-md",
         )}
       >
@@ -135,7 +135,7 @@ export function Header() {
                     transition={{ type: "spring", stiffness: 500, damping: 26 }}
                     className={cn(
                       "absolute right-1 top-1.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full px-1 text-[10px] font-semibold tabular-nums",
-                      overlay ? "bg-background text-foreground" : "bg-foreground text-background",
+                      "bg-foreground text-background",
                     )}
                     data-testid="bag-count"
                   >

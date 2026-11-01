@@ -205,3 +205,19 @@ export async function getAllProductSlugs() {
   if (error) throw new CatalogUnavailableError(error);
   return data ?? [];
 }
+
+/** Categories with their active product count and a representative image. */
+export const getCategoryHighlights = cache(async () => {
+  const [categories, { data, error }] = await Promise.all([
+    getCategories(),
+    db().from("product_cards").select("category_slug, images, popularity").eq("status", "active").order("popularity", { ascending: false }),
+  ]);
+  if (error) throw new CatalogUnavailableError(error);
+  return categories
+    .map((c) => {
+      const rows = (data ?? []).filter((r) => r.category_slug === c.slug);
+      const image = (rows[0]?.images as CardImage[] | null)?.[0]?.url ?? null;
+      return { slug: c.slug, name: c.name, count: rows.length, image };
+    })
+    .filter((c) => c.count > 0);
+});
